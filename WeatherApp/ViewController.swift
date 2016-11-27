@@ -9,10 +9,14 @@
 import UIKit
 
 class ViewController: UIViewController {
+    
+    var weather = WeatherAPI()
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        
+        weather.APICall()
     }
 
     override func didReceiveMemoryWarning() {
