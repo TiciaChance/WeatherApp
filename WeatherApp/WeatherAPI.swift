@@ -16,14 +16,30 @@ protocol WeatherAPIDelegate {
     func didNotGetWeather(error: NSError)
 }
 
-class WeatherAPI: NSObject {
+class WeatherAPI {
     
     let APIkey = "a758550619a710d385f31ca796ab2af1"
-    var city = "newyork"
+    let openWeatherMapBaseURL = "http://api.openweathermap.org/data/2.5/weather"
+    
+    var city = String()
     var weatherDictionary = [String : Any]()
     
-    func APICall() {
-        Alamofire.request("http://api.openweathermap.org/data/2.5/weather?q=\(city)&APPID=\(APIkey)").responseJSON { (response) in
+    private var delegate: WeatherAPIDelegate
+
+    init(delegate: WeatherAPIDelegate) {
+        self.delegate = delegate
+    }
+
+
+    func getWeatherByCity(city: String) {
+        let weatherRequestURL = NSURL(string: "\(openWeatherMapBaseURL)?q=\(city)&APPID=\(APIkey)")!
+        APICall(weatherRequestURL: weatherRequestURL)
+    }
+    
+    func APICall(weatherRequestURL: NSURL) {
+        
+        
+        Alamofire.request(weatherRequestURL as! URLRequestConvertible).responseJSON { (response) in
             
             guard let weather = JSON(data: response.data!).dictionary else {return}
             
@@ -60,4 +76,53 @@ class WeatherAPI: NSObject {
     
 }
 
+//    func getWeatherByCity(city: String) {
+//
+//        let weatherRequestURL = NSURL(string: "\(openWeatherMapBaseURL)?APPID=\(openWeatherMapBaseURL)&q=\(city)")!
+//        APICall(weatherRequestURL: weatherRequestURL)
+//    }
+//
+////     func APICall(weatherRequestURL: NSURL) {
+////
+////        // This is a pretty simple networking task, so the shared session will do.
+////        let session = URLSession.shared
+////
+////
+////        let dataTask = session.dataTask(with: weatherRequestURL) {
+////            if let networkError = error {
+////                // Case 1: Error
+////                // An error occurred while trying to get data from the server.
+////                self.delegate.didNotGetWeather(networkError)
+////            }
+////
+////            else {
+////                // Case 2: Success
+////                // We got data from the server!
+////                do {
+////                    // Try to convert that data into a Swift dictionary
+////                    let weatherData = try NSJSONSerialization.JSONObjectWithData(
+////                        data!,
+////                        options: .MutableContainers) as! [String: AnyObject]
+////
+////                    // If we made it to this point, we've successfully converted the
+////                    // JSON-formatted weather data into a Swift dictionary.
+////                    // Let's now used that dictionary to initialize a Weather struct.
+////                    let weather = Weather(weatherData: weatherData)
+////
+////                    // Now that we have the Weather struct, let's notify the view controller,
+////                    // which will use it to display the weather to the user.
+////                    self.delegate.didGetWeather(weather)
+////                }
+////                catch let jsonError as NSError {
+////                    // An error occurred while trying to convert the data into a Swift dictionary.
+////                    self.delegate.didNotGetWeather(jsonError)
+////                }
+////            }
+////        }
+////
+////        // The data task is set up...launch it!
+////        dataTask.resume()
+////    }
+////
+////}
 
