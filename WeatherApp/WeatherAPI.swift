@@ -10,39 +10,54 @@ import UIKit
 import Alamofire
 import SwiftyJSON
 
+protocol WeatherAPIDelegate {
+    
+    func didGetWeather(weather: Weather)
+    func didNotGetWeather(error: NSError)
+}
+
 class WeatherAPI: NSObject {
     
     let APIkey = "a758550619a710d385f31ca796ab2af1"
     var city = "newyork"
+    var weatherDictionary = [String : Any]()
     
     func APICall() {
         Alamofire.request("http://api.openweathermap.org/data/2.5/weather?q=\(city)&APPID=\(APIkey)").responseJSON { (response) in
             
             guard let weather = JSON(data: response.data!).dictionary else {return}
-                
-            print("Date and time: \(weather["dt"]!)")
-            print("City: \(weather["name"]!)")
             
-            print("Longitude: \(weather["coord"]?["lon"])")
-            print("Latitude: \(weather["coord"]?["lat"])")
+            guard let main = weather["main"] else {return}
             
-            print("Weather ID: \(weather["weather"]![0]["id"])")
-            print("Weather main: \(weather["weather"]![0]["main"])")
-            print("Weather description: \(weather["weather"]![0]["description"])")
-            print("Weather icon ID: \(weather["weather"]![0]["icon"])")
+            self.weatherDictionary["Date and time"] = weather["dt"]
+            self.weatherDictionary["City"] = weather["name"]
             
-            print("Temperature: \(weather["main"]!["temp"])")
-            print("Humidity: \(weather["main"]!["humidity"])")
-            print("Pressure: \(weather["main"]!["pressure"])")
+            self.weatherDictionary["Longitude"] = weather["coord"]?["lon"]
+            self.weatherDictionary["Latitude"] = weather["coord"]?["lat"]
             
-            print("Cloud cover: \(weather["clouds"]!["all"])")
+            self.weatherDictionary["Weather ID"] = weather["weather"]![0]["id"]
+            self.weatherDictionary["Weather main"] = weather["weather"]![0]["main"]
+            self.weatherDictionary["Weather description"] = weather["weather"]![0]["description"]
+            self.weatherDictionary["Weather icon ID"] = weather["weather"]![0]["icon"]
             
-            print("Wind direction: \(weather["wind"]!["deg"]) degrees")
-            print("Wind speed: \(weather["wind"]!["speed"])")
+            self.weatherDictionary["Temperature"] = main["temp"].stringValue
+           self.weatherDictionary["Humidity"] = main["temp"].stringValue
+           self.weatherDictionary["Pressure"] =  main["pressure"].stringValue
             
-            print("Country: \(weather["sys"]!["country"])")
-            print("Sunrise: \(weather["sys"]!["sunrise"])")
-            print("Sunset: \(weather["sys"]!["sunset"])")        }
-    }
+            self.weatherDictionary["Cloud cover"] = weather["clouds"]!["all"]
+            self.weatherDictionary["Wind direction"] = weather["wind"]!["deg"]
+            self.weatherDictionary["Wind speed"] = weather["wind"]!["speed"]
 
+            self.weatherDictionary["Country"] = weather["sys"]!["country"]
+            self.weatherDictionary["Sunrise"] = weather["sys"]!["sunrise"]
+            self.weatherDictionary["Sunset"] = weather["sys"]!["sunset"]
+            
+            print(self.weatherDictionary)
+           // print(weather)
+
+        }
+    }
+    
 }
+
+
