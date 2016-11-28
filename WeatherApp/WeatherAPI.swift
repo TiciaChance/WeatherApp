@@ -52,7 +52,7 @@ class WeatherAPI: NSObject {
             self.weatherDictionary["Sunrise"] = weather["sys"]!["sunrise"]
             self.weatherDictionary["Sunset"] = weather["sys"]!["sunset"]
             
-            print(self.weatherDictionary)
+            print(weather["weather"]?[0])
            // print(weather)
 
         }
