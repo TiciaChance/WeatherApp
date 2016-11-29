@@ -12,7 +12,7 @@ import SwiftyJSON
 
 protocol WeatherAPIDelegate {
     
-    func didGetWeather(weather: Weather)
+    //func didGetWeather(weather: Weather)
     func didNotGetWeather(error: NSError)
 }
 
@@ -22,16 +22,54 @@ class WeatherAPI {
     let openWeatherMapBaseURL = "http://api.openweathermap.org/data/2.5/weather"
     
     var city = String()
+    var country = String()
+    var longitude = Double()
+    var latitude = Double()
+    
+    var weatherID = Int()
+    var mainWeather = String()
+    var weatherDescription = String()
+    var weatherIconID = String()
+    
+    var dateAndTime = NSDate()
+    
+    
+    // OpenWeatherMap reports temperature in Kelvin, so...
+    
+    var temp = Double()
+    var tempCelsius: Double {
+        get {
+            return temp - 273.15
+        }
+    }
+    
+    var tempFahrenheit: Double {
+        get {
+            return (temp - 273.15) * 1.8 + 32
+        }
+    }
+    
+    var humidity = Int()
+    var pressure = Int()
+    var cloudCover = Int()
+    var windSpeed = Double()
+    
+    var windDirection = Double()
+    //let rainfallInLast3Hours: Double?
+    
+    var sunrise = NSDate()
+    var sunset = NSDate()
+    
     
     var weatherDictionary = [String : Any]()
     
     private var delegate: WeatherAPIDelegate
-
+    
     init(delegate: WeatherAPIDelegate) {
         self.delegate = delegate
     }
-
-
+    
+    
     func getWeatherByCity(city: String) {
         let weatherRequestURL = URL(string: "\(openWeatherMapBaseURL)?q=\(city)&APPID=\(APIkey)")!
         let urlRequest = URLRequest(url: weatherRequestURL)
@@ -39,46 +77,46 @@ class WeatherAPI {
         APICall(urlRequest: urlRequest)
     }
     
-
-
-func APICall(urlRequest: URLRequest) {
     
-    Alamofire.request(urlRequest).responseJSON { (response) in
-        
-        guard let weather = JSON(data: response.data!).dictionary else {return}
-        
-        guard let main = weather["main"] else {return}
-        
-        self.weatherDictionary["Date and time"] = weather["dt"]
-//        self.weatherDictionary["City Name"] = weather["name"]
-        self.city = (weather["name"]?.stringValue)!
-        
-        self.weatherDictionary["Longitude"] = weather["coord"]?["lon"]
-        self.weatherDictionary["Latitude"] = weather["coord"]?["lat"]
-        
-        self.weatherDictionary["Weather ID"] = weather["weather"]![0]["id"]
-        self.weatherDictionary["Weather main"] = weather["weather"]![0]["main"]
-        self.weatherDictionary["Weather description"] = weather["weather"]![0]["description"]
-        self.weatherDictionary["Weather icon ID"] = weather["weather"]![0]["icon"]
-        
-        self.weatherDictionary["Temperature"] = main["temp"].stringValue
-        self.weatherDictionary["Humidity"] = main["temp"].stringValue
-        self.weatherDictionary["Pressure"] =  main["pressure"].stringValue
-        
-        self.weatherDictionary["Cloud cover"] = weather["clouds"]!["all"]
-        self.weatherDictionary["Wind direction"] = weather["wind"]!["deg"]
-        self.weatherDictionary["Wind speed"] = weather["wind"]!["speed"]
-        
-        self.weatherDictionary["Country"] = weather["sys"]!["country"]
-        self.weatherDictionary["Sunrise"] = weather["sys"]!["sunrise"]
-        self.weatherDictionary["Sunset"] = weather["sys"]!["sunset"]
-        
-        print(self.city)
-        // print(weather)
-        
-    }
     
-
+    func APICall(urlRequest: URLRequest) {
+        
+        Alamofire.request(urlRequest).responseJSON { (response) in
+            
+            guard let weather = JSON(data: response.data!).dictionary else {return}
+            
+            guard let main = weather["main"] else {return}
+            
+            self.weatherDictionary["Date and Time"] = weather["dt"]
+            self.city = (weather["name"]?.stringValue)!
+            
+            self.longitude = (weather["coord"]?["lon"].doubleValue)!
+            self.latitude = (weather["coord"]?["lat"].doubleValue)!
+            
+            self.weatherID = weather["weather"]![0]["id"].intValue
+            self.mainWeather = weather["weather"]![0]["main"].stringValue
+            self.weatherDescription = weather["weather"]![0]["description"].stringValue
+            self.weatherIconID = weather["weather"]![0]["icon"].stringValue
+            
+            self.temp = main["temp"].doubleValue
+            self.humidity = main["temp"].intValue
+            self.pressure =  main["pressure"].intValue
+            
+            self.cloudCover = weather["clouds"]!["all"].intValue
+            self.windDirection = weather["wind"]!["deg"].doubleValue
+            self.windSpeed = weather["wind"]!["speed"].doubleValue
+            
+            self.country = weather["sys"]!["country"].stringValue
+            self.sunrise = NSDate(timeIntervalSince1970: weather["sys"]!["sunrise"].doubleValue)
+            self.sunset = NSDate(timeIntervalSince1970: weather["sys"]!["sunset"].doubleValue)
+            
+            
+            print(self.city)
+            // print(weather)
+            
+        }
+        
+        
     }
 }
 

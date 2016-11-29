@@ -25,16 +25,16 @@ class ViewController: UIViewController, WeatherAPIDelegate, UITextFieldDelegate 
     let APIkey = "a758550619a710d385f31ca796ab2af1"
     let openWeatherMapBaseURL = "http://api.openweathermap.org/data/2.5/weather"
     let city = String()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         weather = WeatherAPI(delegate: self)
         
-
-        self.cityLabel.text = "test"
-        self.weatherLabel.text = ""
-        self.temperatureLabel.text = ""
+        
+        self.cityLabel.text = weather?.city
+        self.weatherLabel.text = weather?.weatherDescription
+        self.temperatureLabel.text = "\(Int(round((weather?.tempFahrenheit)!)))°"
         self.cloudCoverLabel.text = ""
         self.windLabel.text = ""
         self.rainLabel.text = ""
@@ -44,7 +44,7 @@ class ViewController: UIViewController, WeatherAPIDelegate, UITextFieldDelegate 
         self.cityTextField.enablesReturnKeyAutomatically = true
         self.getCityWeatherButton.isEnabled = false
         
-         self.weather?.getWeatherByCity(city: self.cityTextField.text!)
+        //self.weather?.getWeatherByCity(city: self.cityTextField.text!)
         
         let weatherRequestURL = URL(string:"\(openWeatherMapBaseURL)?q=newyork&APPID=\(APIkey)")!
         let urlRequest = URLRequest(url: weatherRequestURL)
@@ -52,7 +52,7 @@ class ViewController: UIViewController, WeatherAPIDelegate, UITextFieldDelegate 
         
         weather?.APICall(urlRequest: urlRequest)
     }
-
+    
     @IBAction func getWeatherForCityButtonTapped(sender: UIButton) {
         
         guard let text = cityTextField.text, !text.isEmpty else {
@@ -60,36 +60,31 @@ class ViewController: UIViewController, WeatherAPIDelegate, UITextFieldDelegate 
             return
         }
         
-        let BtnURL = URL(string:"\(openWeatherMapBaseURL)?q=\(text)&APPID=\(APIkey)")!
+        //if text.contains(" ") {
+            let wordsFromSeparatedStr = text.components(separatedBy: " ")
+            let combine = wordsFromSeparatedStr.joined()
+        //}
+        
+        let BtnURL = URL(string:"\(openWeatherMapBaseURL)?q=\(combine)&APPID=\(APIkey)")!
         let btnUrlRequest = URLRequest(url: BtnURL)
         
         weather?.APICall(urlRequest: btnUrlRequest)
-        
-        cityLabel.text = weather?.city
-                
+        updateLabels()
     }
     
-    func didGetWeather(weather: Weather) {
-        // This method is called asynchronously, which means it won't execute in the main queue.
-        // ALl UI code needs to execute in the main queue, which is why we're wrapping the code
-        // that updates all the labels in a dispatch_async() call.
-        DispatchQueue.main.async {
-            self.cityLabel.text = weather.city
-            self.weatherLabel.text = weather.weatherDescription
-            self.temperatureLabel.text = "\(Int(round(weather.tempCelsius)))°"
-            self.cloudCoverLabel.text = "\(weather.cloudCover)%"
-            self.windLabel.text = "\(weather.windSpeed) m/s"
-            
-            if let rain = weather.rainfallInLast3Hours {
-                self.rainLabel.text = "\(rain) mm"
-            }
-            else {
-                self.rainLabel.text = "None"
-            }
-            
-            self.humidityLabel.text = "\(weather.humidity)%"
-        }
+    func updateLabels() {
+        
+        self.cityLabel.text = weather?.city
+        self.weatherLabel.text = weather?.weatherDescription
+        self.temperatureLabel.text = "\(Int(round((weather?.tempFahrenheit)!)))°"
+        self.cloudCoverLabel.text = "\(weather?.cloudCover)%"
+        self.windLabel.text = "\(weather?.windSpeed) m/s"
+        self.humidityLabel.text = "\(weather?.humidity)%"
+        
+        
+        
     }
+    
     
     func didNotGetWeather(error: NSError) {
         // This method is called asynchronously, which means it won't execute in the main queue.
@@ -106,9 +101,6 @@ class ViewController: UIViewController, WeatherAPIDelegate, UITextFieldDelegate 
     // MARK: - UITextFieldDelegate and related methods
     // -----------------------------------------------
     
-    // Enable the "Get weather for the city above" button
-    // if the city text field contains any text,
-    // disable it otherwise.
     func textField(_ textField: UITextField,
                    shouldChangeCharactersIn range: NSRange,
                    replacementString string: String) -> Bool {
@@ -116,6 +108,7 @@ class ViewController: UIViewController, WeatherAPIDelegate, UITextFieldDelegate 
         let prospectiveText = (currentText as NSString).replacingCharacters(
             in: range,
             with: string)
+        
         getCityWeatherButton.isEnabled = prospectiveText.characters.count > 0
         print("Count: \(prospectiveText.characters.count)")
         return true
@@ -123,6 +116,7 @@ class ViewController: UIViewController, WeatherAPIDelegate, UITextFieldDelegate 
     
     // Pressing the clear button on the text field (the x-in-a-circle button
     // on the right side of the field)
+    
     func textFieldShouldClear(_ textField: UITextField) -> Bool {
         // Even though pressing the clear button clears the text field,
         // this line is necessary. I'll explain in a later blog post.
@@ -134,6 +128,7 @@ class ViewController: UIViewController, WeatherAPIDelegate, UITextFieldDelegate 
     
     // Pressing the return button on the keyboard should be like
     // pressing the "Get weather for the city above" button.
+    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         getWeatherForCityButtonTapped(sender: getCityWeatherButton)
@@ -176,16 +171,14 @@ class ViewController: UIViewController, WeatherAPIDelegate, UITextFieldDelegate 
 
 extension String {
     
-    // A handy method for %-encoding strings containing spaces and other
-    // characters that need to be converted for use in URLs.
     var urlEncoded: String {
         
         return self.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlUserAllowed)!
         
     }
 }
-    
-    
+
+
 
 
 
