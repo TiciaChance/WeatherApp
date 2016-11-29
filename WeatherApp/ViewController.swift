@@ -21,16 +21,16 @@ class ViewController: UIViewController, WeatherAPIDelegate, UITextFieldDelegate 
     @IBOutlet weak var getCityWeatherButton: UIButton!
     
     // do my research into the deprecation of intializer pointers
+    
     var weather : WeatherAPI? = nil
     let APIkey = "a758550619a710d385f31ca796ab2af1"
     let openWeatherMapBaseURL = "http://api.openweathermap.org/data/2.5/weather"
-    let city = String()
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         weather = WeatherAPI(delegate: self)
-        
         
         self.cityLabel.text = weather?.city
         self.weatherLabel.text = weather?.weatherDescription
