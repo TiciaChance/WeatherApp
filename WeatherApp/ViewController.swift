@@ -22,39 +22,51 @@ class ViewController: UIViewController, WeatherAPIDelegate, UITextFieldDelegate 
     
     // do my research into the deprecation of intializer pointers
     var weather : WeatherAPI? = nil
+    let APIkey = "a758550619a710d385f31ca796ab2af1"
+    let openWeatherMapBaseURL = "http://api.openweathermap.org/data/2.5/weather"
+    let city = String()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
         weather = WeatherAPI(delegate: self)
         
-        cityLabel.text = "simple weather"
-        weatherLabel.text = ""
-        temperatureLabel.text = ""
-        cloudCoverLabel.text = ""
-        windLabel.text = ""
-        rainLabel.text = ""
-        humidityLabel.text = ""
-        cityTextField.text = ""
-        cityTextField.placeholder = "Enter city name"
-        cityTextField.delegate = self
-        cityTextField.enablesReturnKeyAutomatically = true
-        getCityWeatherButton.isEnabled = false
+
+        self.cityLabel.text = "test"
+        self.weatherLabel.text = ""
+        self.temperatureLabel.text = ""
+        self.cloudCoverLabel.text = ""
+        self.windLabel.text = ""
+        self.rainLabel.text = ""
+        self.humidityLabel.text = ""
+        self.cityTextField.placeholder = "Enter city name"
+        self.cityTextField.delegate = self
+        self.cityTextField.enablesReturnKeyAutomatically = true
+        self.getCityWeatherButton.isEnabled = false
         
-        weather?.getWeatherByCity(city: "London")
+         self.weather?.getWeatherByCity(city: self.cityTextField.text!)
+        
+        let weatherRequestURL = URL(string:"\(openWeatherMapBaseURL)?q=newyork&APPID=\(APIkey)")!
+        let urlRequest = URLRequest(url: weatherRequestURL)
         
         
+        weather?.APICall(urlRequest: urlRequest)
     }
 
     @IBAction func getWeatherForCityButtonTapped(sender: UIButton) {
         
         guard let text = cityTextField.text, !text.isEmpty else {
+            print("nope")
             return
         }
         
+        let BtnURL = URL(string:"\(openWeatherMapBaseURL)?q=\(text)&APPID=\(APIkey)")!
+        let btnUrlRequest = URLRequest(url: BtnURL)
         
-        weather?.APICall(weatherRequestURL: NSURL(string: cityTextField.text!.urlEncoded)!)
+        weather?.APICall(urlRequest: btnUrlRequest)
         
+        cityLabel.text = weather?.city
+                
     }
     
     func didGetWeather(weather: Weather) {

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyJSON
 
 struct Weather {
     
@@ -49,45 +50,45 @@ struct Weather {
     
     let sunrise: NSDate
     let sunset: NSDate
+
+    var newDict = [String: Any]()
     
-    init(weatherData: [String: AnyObject]) {
+    init(weatherData: [String: AnyObject], weather: WeatherAPI) {
         
-        dateAndTime = NSDate(timeIntervalSince1970: weatherData["dt"] as! TimeInterval)
-        city = weatherData["name"] as! String
+        newDict = weather.weatherDictionary
         
-        let coordDict = weatherData["coord"] as! [String: AnyObject]
-        longitude = coordDict["lon"] as! Double
-        latitude = coordDict["lat"] as! Double
+        dateAndTime = NSDate(timeIntervalSince1970: newDict["Date and Time"] as! TimeInterval)
+        city = newDict["City Name"] as! String
         
-        let weatherDict = weatherData["weather"]?[0] as! [String: AnyObject]
-        weatherID = weatherDict["id"] as! Int
-        mainWeather = weatherDict["main"] as! String
-        weatherDescription = weatherDict["description"] as! String
-        weatherIconID = weatherDict["icon"] as! String
+        longitude = newDict["Longitude"] as! Double
+        latitude = newDict["Latitude"] as! Double
         
-        let mainDict = weatherData["main"] as! [String: AnyObject]
-        temp = mainDict["temp"] as! Double
-        humidity = mainDict["humidity"] as! Int
-        pressure = mainDict["pressure"] as! Int
+        weatherID = newDict["Weather ID"] as! Int
+        mainWeather = newDict["Weather main"] as! String
+        weatherDescription = newDict["Weather description"] as! String
+        weatherIconID = newDict["Weather icon ID"] as! String
         
-        cloudCover = weatherData["clouds"]!["all"] as! Int
+        temp = newDict["Temperature"] as! Double
+        humidity = newDict["Humidity"] as! Int
+        pressure = newDict["Pressure"] as! Int
+  
+        cloudCover = newDict["Cloud Cover"] as! Int
+        windSpeed = newDict["Wind speed"] as! Double
+        windDirection = newDict["Wind direction"] as! Double?
         
-        let windDict = weatherData["wind"] as! [String: AnyObject]
-        windSpeed = windDict["speed"] as! Double
-        windDirection = windDict["deg"] as? Double
+        country = newDict["Country"] as! String
         
-        if weatherData["rain"] != nil {
-            let rainDict = weatherData["rain"] as! [String: AnyObject]
+        
+        if newDict["rain"] != nil {
+            let rainDict = newDict["rain"] as! [String: AnyObject]
             rainfallInLast3Hours = rainDict["3h"] as? Double
         }
         else {
             rainfallInLast3Hours = nil
         }
         
-        let sysDict = weatherData["sys"] as! [String: AnyObject]
-        country = sysDict["country"] as! String
-        sunrise = NSDate(timeIntervalSince1970: sysDict["sunrise"] as! TimeInterval)
-        sunset = NSDate(timeIntervalSince1970:sysDict["sunset"] as! TimeInterval)
+        sunrise = NSDate(timeIntervalSince1970: newDict["Sunrise"] as! TimeInterval)
+        sunset = NSDate(timeIntervalSince1970: newDict["Sunset"] as! TimeInterval)
     }
     
 }
